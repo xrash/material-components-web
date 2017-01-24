@@ -16,7 +16,14 @@
 
 import MDCFoundation from './foundation';
 
+/**
+ * @template T
+ */
 export default class MDCComponent {
+  /**
+   * @param {!Element} root
+   * @return {!MDCComponent}
+   */
   static attachTo(root) {
     // Subclasses which extend MDCBase should provide an attachTo() method that takes a root element and
     // returns an instantiated component with its root set to that element. Also note that in the cases of
@@ -25,20 +32,40 @@ export default class MDCComponent {
     return new MDCComponent(root, new MDCFoundation());
   }
 
+  /**
+   * @param {!Element} root
+   * @param {T=} foundation
+   * @param {...?} args
+   */
   constructor(root, foundation = this.getDefaultFoundation(), ...args) {
+    /** @protected @const {!Element} */
     this.root_ = root;
     this.initialize(...args);
+    /** @protected @const {T} */
     this.foundation_ = foundation;
     this.foundation_.init();
     this.initialSyncWithDOM();
+
+    /** @const {!Element} */
+    this.root;
   }
 
-  initialize(/* ...args */) {
+  get root() {
+    return this.root_;
+  }
+
+  /**
+   * @param {...?} args
+   */
+  initialize(...args) {
     // Subclasses can override this to do any additional setup work that would be considered part of a
     // "constructor". Essentially, it is a hook into the parent constructor before the foundation is
     // initialized. Any additional arguments besides root and foundation will be passed in here.
   }
 
+  /**
+   * @return {T}
+   */
   getDefaultFoundation() {
     // Subclasses must override this method to return a properly configured foundation class for the
     // component.
@@ -61,18 +88,30 @@ export default class MDCComponent {
 
   // Wrapper method to add an event listener to the component's root element. This is most useful when
   // listening for custom events.
+  /**
+   * @param {string} evtType
+   * @param {!Function} handler
+   */
   listen(evtType, handler) {
     this.root_.addEventListener(evtType, handler);
   }
 
   // Wrapper method to remove an event listener to the component's root element. This is most useful when
   // unlistening for custom events.
+  /**
+   * @param {string} evtType
+   * @param {!Function} handler
+   */
   unlisten(evtType, handler) {
     this.root_.removeEventListener(evtType, handler);
   }
 
   // Fires a cross-browser-compatible custom event from the component root of the given type,
   // with the given data.
+  /**
+   * @param {string} evtType
+   * @param {!Object} evtData
+   */
   emit(evtType, evtData) {
     let evt;
     if (typeof CustomEvent === 'function') {
